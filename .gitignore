@@ -1,0 +1,9 @@
+# banco
+*.db
+
+# dados
+data/
+
+# python
+__pycache__/
+*.pyc
