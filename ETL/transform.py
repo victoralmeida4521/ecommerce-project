@@ -1,8 +1,12 @@
 import pandas as pd
 import sqlite3
 from datetime import datetime
-
 import os
+
+
+# -------------------------
+# Caminho do banco
+# ------------------------- 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_path = os.path.join(BASE_DIR, "ecommerce.db")
 
@@ -48,7 +52,7 @@ def transform_data_bronze_to_silver():
         #Validação 
         validation = validate_dataframe(df, table)
 
-        # Aqui você pode adicionar as transformações necessárias para cada tabela
+        #adicionar as transformações necessárias para cada tabela
         transformed = False
 
         # Remover colunas totalmente nulas
@@ -74,8 +78,10 @@ def transform_data_bronze_to_silver():
             "rows": validation["rows"],
             "cols": validation["cols"]
         })
-
+        
+    # -------------------------
     # salvar log
+    # -------------------------
     audit_df = pd.DataFrame(audit_logs)
     audit_df.to_sql("audit_bronze_to_silver", conn, if_exists='replace', index=False)
 

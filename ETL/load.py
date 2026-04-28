@@ -1,8 +1,11 @@
 import pandas as pd
 print(pd.__version__)
 import sqlite3
-
 import os
+
+# -------------------------
+# Caminho do banco
+# ------------------------- 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_path = os.path.join(BASE_DIR, "ecommerce.db")
 
@@ -10,10 +13,9 @@ DB_path = os.path.join(BASE_DIR, "ecommerce.db")
 def transform_data_silver_to_gold():
     conn = sqlite3.connect(DB_path)
 
-    #------------------ 
+    # -------------------------
     # GOLD 1: KPIs
-    #------------------
-
+    # -------------------------
     orders = pd.read_sql_query(
         "SELECT * FROM olist_orders_dataset_silver", conn
     )
@@ -35,9 +37,7 @@ def transform_data_silver_to_gold():
         .reset_index(name="total_orders")
     )
 
-    payments = pd.read_sql_query(
-        "SELECT * FROM olist_order_payments_dataset_silver", conn   
-    )
+
 
     df = orders.merge(payments, on="order_id", how="left")
 
@@ -59,9 +59,9 @@ def transform_data_silver_to_gold():
         index = False
     )
 
-    #---------------------------- 
+    # -------------------------
     # GOLD 2: Pedidos por cidade
-    #----------------------------
+    # -------------------------
     customers = pd.read_sql_query(
         "SELECT * FROM olist_customers_dataset_silver", conn
     )
@@ -81,10 +81,9 @@ def transform_data_silver_to_gold():
         index=False
     )
 
-    #---------------------------- 
+    # -------------------------
     # GOLD 3: Produtos mais vendidos
-    #----------------------------
-
+    # -------------------------
     items = pd.read_sql_query(
         "SELECT * FROM olist_order_items_dataset_silver", conn       
     )

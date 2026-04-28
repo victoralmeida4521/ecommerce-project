@@ -2,18 +2,26 @@ import pandas as pd
 import os
 import sqlite3
 from datetime import datetime
-
 import os
+
+# -------------------------
+# Caminho do banco
+# -------------------------    
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_path = os.path.join(BASE_DIR, "ecommerce.db")
 
 def extract_data_from_csv():
     conn = sqlite3.connect(DB_path)
 
-    ## listar os arquivos csv
+    # -------------------------
+    # Listar arquivos .csv
+    # -------------------------
     csv_files = [f for f in os.listdir("C:\\estudos\\ecommerce-project\\data") if f.endswith('.csv')]
     print("Dados listados")
-    ## ler os arquivos csv e armazenar no .db
+
+    # -------------------------
+    # ler os arquivos csv e armazenar no .db
+    # -------------------------
     for csv_file in csv_files:
         df = pd.read_csv(os.path.join("C:\\estudos\\ecommerce-project\\data", csv_file))
         table_name = csv_file.split('.')[0]
