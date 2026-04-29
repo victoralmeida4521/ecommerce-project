@@ -45,7 +45,7 @@ plt.show()
 # Gráfico ticket médio
 # -------------------------
 plt.figure()
-plt.plot(kpis["date"], kpis["ticket_medio"])
+plt.plot(kpis["date"], kpis["avg_ticket"])
 plt.xticks(rotation=45)
 plt.title("Ticket médio ao longo do tempo")
 plt.tight_layout()

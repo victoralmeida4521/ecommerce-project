@@ -48,7 +48,7 @@ def transform_data_silver_to_gold():
     )
 
     gold_daily = orders_per_day.merge(revenue_per_day, on= 'date')
-    gold_daily["ticket_medio"] = (
+    gold_daily["avg_ticket"] = (
         gold_daily["total_revenue"] / gold_daily["total_orders"]
     )
 
