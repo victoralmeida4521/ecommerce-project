@@ -1,14 +1,8 @@
 import pandas as pd
 import sqlite3
 from datetime import datetime
-import os
 
-
-# -------------------------
-# Caminho do banco
-# ------------------------- 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DB_path = os.path.join(BASE_DIR, "ecommerce.db")
+from config import DB_path
 
 
 def validate_dataframe(df, tablename):
@@ -34,57 +28,58 @@ def validate_dataframe(df, tablename):
     }
 
 def transform_data_bronze_to_silver():
-    conn = sqlite3.connect('ecommerce.db')
+     with sqlite3.connect(DB_path) as conn:
 
-    tables = pd.read_sql_query(
-        "SELECT name FROM sqlite_master WHERE type='table'", conn
-    )['name']
+        tables = pd.read_sql_query(
+            "SELECT name FROM sqlite_master WHERE type='table'", conn
+        )['name']
 
-    tables = [t for t in tables if not t.endswith('_silver') and not t.endswith('_gold') and t != 'audit_bronze_to_silver']
+        tables = [t for t in tables if not t.endswith('_silver') and not t.endswith('_gold') and t != 'audit_bronze_to_silver']
 
-    audit_logs = []
+        audit_logs = []
 
-    for table in tables:
-        print(f"\nTransformando {table}(bronze para silver)")
+        for table in tables:
+            print(f"\nTransformando {table}(bronze para silver)")
 
-        df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
+            df = pd.read_sql_query(f"SELECT * FROM {table}", conn)
 
-        #Validação 
-        validation = validate_dataframe(df, table)
+            #Validação 
+            validation = validate_dataframe(df, table)
 
-        #adicionar as transformações necessárias para cada tabela
-        transformed = False
+            #adicionar as transformações necessárias para cada tabela
+            transformed = False
 
-        # Remover colunas totalmente nulas
-        null_cols = df.columns[df.isnull().all()]
-        if len(null_cols) > 0:
-           df = df.drop(columns=null_cols)
-           transformed = True
+            # Remover colunas totalmente nulas
+            null_cols = df.columns[df.isnull().all()]
+            if len(null_cols) > 0:
+                df = df.drop(columns=null_cols)
+                transformed = True
 
-        # Nome da tabela silver
-        silver_table = f"{table}_silver"
+            # Nome da tabela silver
+            silver_table = f"{table}_silver"
 
-        df.to_sql(silver_table, conn, if_exists='replace', index=False)
+            df.to_sql(silver_table, conn, if_exists='replace', index=False)
 
-        print(f"Tabela salva como {silver_table}")
-        print(f"Transformação aplicada{transformed}")
+            print(f"Tabela salva como {silver_table}")
+            print(f"Transformação aplicada{transformed}")
 
-        # Log de auditoria
-        audit_logs.append({
-            "table": table,
-            "silver_table": silver_table,
-            "transformed": transformed,
-            "timestamp": datetime.now().isoformat(),
-            "rows": validation["rows"],
-            "cols": validation["cols"]
-        })
-        
-    # -------------------------
-    # salvar log
-    # -------------------------
-    audit_df = pd.DataFrame(audit_logs)
-    audit_df.to_sql("audit_bronze_to_silver", conn, if_exists='replace', index=False)
+            # Log de auditoria
+            audit_logs.append({
+                "table": table,
+                "silver_table": silver_table,
+                "transformed": transformed,
+                "timestamp": datetime.now().isoformat(),
+                "rows": validation["rows"],
+                "cols": validation["cols"]
+            })
+            
+        # -------------------------
+        # salvar log
+        # -------------------------
+        audit_df = pd.DataFrame(audit_logs)
+        audit_df.to_sql("audit_bronze_to_silver", conn, if_exists='replace', index=False)
 
-    print("\n Log de auditoria Bronze para Silver salvo na tabela audit_bronze_to_silver")
+        print("\n Log de auditoria Bronze para Silver salvo na tabela audit_bronze_to_silver")
 
-    conn.close()
+        if __name__ == "__main__":
+            transform_data_bronze_to_silver
