@@ -1,8 +1,8 @@
 # banco
 *.db
 
-# dados
-data/
+
+
 
 # python
 __pycache__/
